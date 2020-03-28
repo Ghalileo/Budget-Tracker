@@ -41,7 +41,7 @@ function checkDatabase() {
     const getAll = checking.getAll();
     getAll.onsuccess = function() {
         if (getAll.result.length > 0) {
-            fetch("api/transaction/bulk", {
+            fetch("/api/transaction/bulk", {
                 method: "POST",
                 body: JSON.stringify(getAll.result),
                 headers: {
@@ -54,7 +54,7 @@ function checkDatabase() {
                 // opens transaction on pending database if successful
                 const workTransaction = db.transaction(["pending"], "readWrite");
                 // allows access to pending object store
-                const success = succTransaction.objectStore("pending");
+                const success = workTransaction.objectStore("pending");
                 //clears all of the items in store
                 success.clear();
             })

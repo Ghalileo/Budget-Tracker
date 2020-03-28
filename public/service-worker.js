@@ -4,6 +4,7 @@ const FILES_TO_CACHE = [
     "/",
     "/index.html",
     "/index.js",
+    "/db.js",
     "/manifest.webmanifest",
     "/style.css",
     "/icons/icon-192x192.png",
@@ -32,7 +33,7 @@ self.addEventListener("activate", function(evt) {
             return Promise.all(
                 keyList.map(key => {
                     if(key !== CACHE_NAME && key !== DATA_CACHE_NAME){
-                        console.log("Removing all cache data", key);
+                        console.log("Removing old cache data", key);
                         return caches.delete(key);
                     }
                 })
@@ -43,7 +44,7 @@ self.addEventListener("activate", function(evt) {
     self.clients.claim();
 });
 
-self.addEventListener("fetch", (evt) => {
+self.addEventListener("fetch", function(evt) {
     //cache requests successfully to the present api
     if(evt.request.url.includes("/")) {
         evt.respondWith(
@@ -56,14 +57,16 @@ self.addEventListener("fetch", (evt) => {
                         }
                         return response;
                     })
-            })
+                    .catch(err => {
+                        return cache.match(evt.request);
+                    });
+            }).catch(err => console.log(err))
         )
     }
-})
-
-//Utilizes static assets using offline-first if request is not for the api
+    //Utilizes static assets using offline-first if request is not for the api
 evt.respondWith(
     caches.match(evt.request).then((response) => {
         return response || fetch(evt.request);
     })
 )
+})
